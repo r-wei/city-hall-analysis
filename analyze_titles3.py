@@ -1,7 +1,7 @@
-import csv, re, collections
+import csv, collections
 
 #print everything to this file
-output_file = open('title_stats', 'w')
+output_file = open('title_stats3', 'w')
 
 #read in and preprocess the titles
 input_file = open("matter_titles_01.csv", "rb")
@@ -53,7 +53,7 @@ for n in trunc_lengths:
     #add counter_n to the full_counter
     full_counter = full_counter + counter_n
 
-#print (more or less) the top k most commont titles of all truncation lengths
+#print (more or less) the top k most common titles of all truncation lengths
 all_top_k = full_counter.most_common(len(trunc_lengths)*k)
 for item in all_top_k:
     output_file.write("%s\n" % str(item))
