@@ -1,6 +1,6 @@
 import csv, re, collections
 
-input_file = open("matter_titles_01.csv", "rb")
+input_file = open("data/ordinance_titles_01.csv", "rb")
 titles = [row[0] for row in csv.reader(input_file)] #list of titles
 titles_trunc = []
 

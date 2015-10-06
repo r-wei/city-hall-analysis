@@ -1,10 +1,10 @@
 import csv, re, collections
 
 #print everything to this file
-output_file = open('title_stats6', 'w')
+output_file = open('test_results/title_stats6', 'w')
 
 #read in and preprocess the titles
-input_file = open("matter_titles_01.csv", "rb")
+input_file = open("data/ordinance_titles_01.csv", "rb")
 titles = [row[0] for row in csv.reader(input_file)] #list of strings of titles
 
 titles_trunc = [] #will be a list of strings
