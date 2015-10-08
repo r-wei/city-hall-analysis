@@ -1,5 +1,4 @@
 requirements.txt
 natlangenv/
 .DS_Store
-data/
 test_results/
