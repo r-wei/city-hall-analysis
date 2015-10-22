@@ -2,3 +2,4 @@ requirements.txt
 natlangenv/
 .DS_Store
 test_results/
+cloudpull.py

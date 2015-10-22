@@ -22,19 +22,19 @@ first_inst_pattern = re.compile(r"(.+?)( for | No\. )(.*)")
 last_inst_pattern = re.compile(r"(.+)( at | as )(.*)")
 
 for title in titles:
-    match = first_inst_pattern.match(title)
+  match = first_inst_pattern.match(title)
+  if match != None:
+    titles_trunc = titles_trunc + [match.group(1)]
+  else:
+    match = last_inst_pattern.match(title)
     if match != None:
-	titles_trunc = titles_trunc + [match.group(1)]
+      titles_trunc = titles_trunc + [match.group(1)]
     else:
-	match = last_inst_pattern.match(title)
-    	if match != None:
-	    titles_trunc = titles_trunc + [match.group(1)]
-	else:
-	    title_split = title.split(' ') #each title is a list of strings of words
-            m = min(n, len(title))
-       	    title_trunc = ' '.join(title_split[:m])
-	
-       	    titles_trunc = titles_trunc + [title_trunc] 
+      title_split = title.split(' ') #each title is a list of strings of words
+      m = min(n, len(title))
+      title_trunc = ' '.join(title_split[:m])
+
+      titles_trunc = titles_trunc + [title_trunc] 
 
 #count how often each truncated title occurs
 #create a dictionary of (title_trunc, #occurences) pairs
