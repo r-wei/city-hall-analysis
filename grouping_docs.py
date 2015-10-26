@@ -6,6 +6,7 @@
 import csv, collections
 import numpy as np
 from numpy import linalg
+from nltk.tokenize import RegexpTokenizer
 
 #read in and preprocess the titles
 input_file = open("data/communication_titles_01.csv", "rb")
@@ -21,8 +22,11 @@ j = len(titles) #number of documents
 wordfreq_upperbound = 0.2*j
 wordfreq_lowerbound = 0.045*j
 
+tokenizer = RegexpTokenizer('\w+') #pick out alphanumeric sequences; discard punctuation, white space
+
 for title in titles:
-    title_words = title.split(' ') #each title is a list of strings of words
+    #use tokenizer to clean list of words: remove punctuation, decapitalize
+    title_words = map(str.lower,tokenizer.tokenize(title)) #each title is a list of words
     titles_list = titles_list + [title_words]
     keywords = keywords.union(set(title_words))
 
@@ -71,7 +75,7 @@ print "average # of docs per keyword: " + str(new_corr_matrix.sum(axis=0).sum(ax
 k=1
 num_rows = new_corr_matrix.shape[0]
 pairs = []
-cutoff=3.4 #raising the cutoff above 3.4, we start to see phrases involving prepositions
+cutoff=2.8 #raising the cutoff above 3.4, we start to see phrases involving prepositions
 for i in range(num_rows):
     for j in range(num_rows - i-1):
 	#compute the Euclidean distance between 2 rows
