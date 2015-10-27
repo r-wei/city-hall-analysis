@@ -7,6 +7,7 @@ import csv, collections
 import numpy as np
 from numpy import linalg
 from nltk.tokenize import RegexpTokenizer
+from scipy.cluster.vq import vq, kmeans2, whiten
 
 #read in and preprocess the titles
 input_file = open("data/communication_titles_01.csv", "rb")
@@ -97,8 +98,16 @@ print len(pairs)
 #find the diameter of the column vectors
 
 #method 2: k-means
-#use k-means to group row vectors into keyword groups
-#use k-means to group columns; starting centroids given by vectors of keyword groups found above
+#1. use k-means to group row vectors into keyword groups
+#1b. merge keywords into keyword-groups (maybe by taking the average count of all keywords in a group as features for documents?)
+#2. use k-means to group columns
+
+#grouping row vectors
+k=7 #number of keyword centroids, can play with this parameter
+white_corr_matrix = whiten(new_corr_matrix)
+keyword_centroids = kmeans2(new_corr_matrix,k)
+print keyword_centroids #try pycluster or python-cluster instead?
+
 
 #Other matters:
 #Can we use documents with lots of rare words to identify documents with lots of misspellings?
