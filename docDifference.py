@@ -26,7 +26,7 @@ doc4 = open('zoning/'+listFiles[11], "rb").read().splitlines()
 
 
 
-allDocs = [doc1]
+allDocs = [doc1, doc2, doc3]
 
 meetingDates = []
 status = []
@@ -36,7 +36,7 @@ title = []
 committee = []
 for doc in allDocs: 
 	#Remove empty lines from the document list.
-	doc = list(filter(None, doc1))
+	doc = list(filter(None, doc))
 	doc.remove(' ')
 	for i in range(0, len(doc)):
 		# doc[i] represents a line in the document
