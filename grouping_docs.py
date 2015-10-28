@@ -46,7 +46,7 @@ for title in titles_list:
 #print stats from the correlation matrix without any keywords removed
 print correlation_matrix.shape
 print "average # of keywords per doc: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per keyword: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0])
+print "average # of docs per keyword (with multiplicity): " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0])
 
 
 #TWO: make new_corr_matrix and new_keywords_index of words
@@ -68,7 +68,7 @@ new_corr_matrix = np.array(new_corr_list)
 print "--------------"
 print new_corr_matrix.shape
 print "average # of keywords per doc: " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per keyword: " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/new_corr_matrix.shape[0])
+print "average # of docs per keyword (with multiplicity): " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/new_corr_matrix.shape[0])
 
 
 #THREE: Analyze the rows of correlation_matrix:
@@ -105,8 +105,8 @@ print len(pairs)
 #grouping row vectors
 k=7 #number of keyword centroids, can play with this parameter
 white_corr_matrix = whiten(new_corr_matrix)
-keyword_centroids = kmeans2(new_corr_matrix,k)
-print keyword_centroids #try pycluster or python-cluster instead?
+keyword_centroids = kmeans2(new_how_matrix,k)
+print keyword_centroids #how to get cluster assigments: try pycluster or python-cluster instead?
 
 
 #Other matters:

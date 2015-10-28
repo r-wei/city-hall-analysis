@@ -45,7 +45,7 @@ for title in titles_list:
 #print stats from the correlation matrix without any keywords removed
 print correlation_matrix.shape
 print "average # of keywords per doc: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per keyword: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0])
+print "average # of docs per keyword (with multiplicity): " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0])
 
 #TWO: separate the correlation_matrix and keywords_index into
 #rare vs common corr_matrix and keywords_index, resp.
@@ -75,7 +75,7 @@ common_corr_matrix = np.array(common_corr_list)
 print "--------------"
 print rare_corr_matrix.shape
 print "average # of rare words per doc: " + str(rare_corr_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per rare word: " + str(rare_corr_matrix.sum(axis=0).sum(axis=0)/rare_corr_matrix.shape[0])
+print "average # of docs per rare word (with multiplicity): " + str(rare_corr_matrix.sum(axis=0).sum(axis=0)/rare_corr_matrix.shape[0])
 
 #THREE: find a document with lots of rare words
 #returns too many docs because there are too many rare words
