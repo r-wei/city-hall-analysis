@@ -1,0 +1,19 @@
+import csv, collections, string
+
+#print everything to this file
+output_file = open('test_results/comm_stats', 'w')
+
+#read in and preprocess the titles
+input_file = open("data/communication_titles_01.csv", "rb")
+titles = [row[0] for row in csv.reader(input_file)] #list of strings of titles
+titles_list = [] #will be a list of sets
+
+
+for title in titles:  
+    title_nopunct = title.translate(string.maketrans("",""), string.punctuation) #remove punctuation
+    title_split = title_nopunct.split(' ') #each title is a list of strings of words
+    title_split = [s.lower() for s in title_split] #lowercase
+    titles_list = titles_list + title_split
+
+counter = collections.Counter(titles_list)[:50]
+print counter
