@@ -1,8 +1,9 @@
 import difflib 
 import os
 import csv
+import nltk
 from pprint import pprint
-from nltk import metrics, stem, tokenize
+from nltk import metrics, stem, tokenize, data
 
 # This section of code defines a method for matching strings that are not 
 # exactly the same, but pretty similar.
@@ -17,6 +18,8 @@ def fuzzy_match(s1, s2, max_dist=2):
 #Get a list of all the files
 listFiles = os.listdir("zoning/docs")
 
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+
 #Open and read specific files
 # zoningDoc = open('zoning/zoning.txt', "rb").read().splitlines()
 # doc1 = open('zoning/'+listFiles[8], "rb").read().splitlines()
@@ -27,12 +30,13 @@ listFiles = os.listdir("zoning/docs")
 
 
 meetingDates = ["Meeting Date"]+["N/A"]*len(listFiles)
-print(meetingDates)
 status = ["Status"]+["N/A"]*len(listFiles)
 sponsors = ["Sponsor(s)"]+["N/A"]*len(listFiles)
 matterType = ["Matter Type"]+["N/A"]*len(listFiles)
 title = ["Title"]+["N/A"]*len(listFiles)
 committee = ["Committee"]+["N/A"]*len(listFiles)
+section1 = ["Section 1"]+["N/A"]*len(listFiles)
+section2 = ["Section 2"]+["N/A"]*len(listFiles)
 
 count = 1
 
@@ -48,6 +52,10 @@ for docFile in listFiles:
 	    doc.remove('')
 	except ValueError:
 	    pass
+
+	section1Start = None;
+	section2Start = None;
+
 	
 	for i in range(0, len(doc)):
 		# doc[i] represents a line in the document
@@ -65,15 +73,37 @@ for docFile in listFiles:
 			title[count] = doc[i+1]
 		elif(fuzzy_match(doc[i], "Committee(s) Assignment:")):
 			committee[count] = doc[i+1]
+		if("section 1." in doc[i].lower()):
+			section1Start = i
+		if("section 2." in doc[i].lower()):
+			section2Start = i
+
+	# Grab the Section 1 
+	s1 = doc[section1Start:section2Start]
+	s1 = " ".join(s1)
+	section1[count] = s1
+
+	# Grab Section 2
+	s2 = doc[section2Start:]
+	s2 = " ".join(s2)
+	s2 = tokenizer.tokenize(s2)
+	
+	# This breaks Section 2 into it's individual sentences
+	# and then takes the primary sentence of that section
+	section2[count] = s2[1];
+
+
+	#sentences = " ".join(sentences)
+	#print(sentences+"\n\n")
 
 	count = count+1;
 
 	
 
-allLists = [meetingDates, status, sponsors, matterType, title, committee]
-print(allLists)
+allLists = [meetingDates, status, sponsors, matterType, title, committee, section1, section2]
+#print(allLists)
 allLists = list(zip(*allLists))
-pprint(allLists)
+#pprint(allLists)
 
 with open('zoning/zoning.csv', 'w') as csvfile:
 	writer = csv.writer(csvfile, delimiter=',')

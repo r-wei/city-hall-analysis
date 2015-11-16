@@ -3,3 +3,5 @@ natlangenv/
 .DS_Store
 test_results/
 cloudpull.py
+cloudTitles.py
+allDocs/
