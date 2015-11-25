@@ -7,10 +7,10 @@ trunc_lengths = [4,3,2,1] #list of truncation lengths
 k = 20 #print the top k most common truncated titles for each n in trunc_lengths
 
 #print everything to this file
-output_file = open('test_results/title_stats3', 'w')
+output_file = open('~/city-hall-analysis/test_results/title_stats3', 'w')
 
 #read in and preprocess the titles
-input_file = open("allTitles.csv", "rb")
+input_file = open("city-hall-analysis/data/allTitles.csv", "rb")
 titles = [row[0] for row in csv.reader(input_file)] #list of strings of titles
 titles_split = [] #will be a list of lists
 titles_trunc = [] #will be a list of strings
