@@ -5,8 +5,4 @@ test_results/
 cloudpull.py
 cloudTitles.py
 allDocs/
-<<<<<<< HEAD
 joes_example.py
-=======
-topWords.txt
->>>>>>> 035c63fde8ed61f5e4cf209ddf0a8ae57899a030
