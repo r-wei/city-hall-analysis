@@ -5,8 +5,8 @@ import csv, re, collections
 from parsers import *
 
 #can play with these parameters
-k = 100 #print the top k most common truncated titles
-k2 = 30 #throw everything except those grouped in the top k2 truncated titles back in for analysis
+k = 17 #print the top k most common truncated titles
+k2 = 17 #throw everything except those grouped in the top k2 truncated titles back in for analysis
 
 #print everything to these files
 output_file = open('test_results/title_stats5', 'w')
@@ -15,7 +15,7 @@ new_csv2 = open('throwbackTitles.csv', 'w')
 
 #read in the titles
 input_file = open("allTitles.csv", "rb")
-titles = [row[0] for row in csv.reader(input_file)] #list of strings of titles
+titles = [row[0] for row in csv.reader(input_file, delimiter='~')] #list of strings of titles
 
 titles_trunc = [] #will be a list of strings
 remaining_titles = [] #list of strings
@@ -39,18 +39,18 @@ for row in remaining_titles:
 
 #print the strategies used
 line = "Strategies used: " + str(strategies)
-output_file.write("%s\m" % line)
+output_file.write("%s\n" % line)
 
 #total number of docs we've organized
 line = "Number of docs organized by these strategies: " + str(len(titles_trunc))
-output_file.write("%s\m" % line)
+output_file.write("%s\n" % line)
 
 #count how often each truncated title occurs
 #create a dictionary of (title_trunc, #occurences) pairs
 counter = collections.Counter(titles_trunc)
 
 #print the number of groups
-line = "Number of groups organized by these strategies is: "+ str(len(counter))
+line = "Number of groups formed by these strategies is: "+ str(len(counter))
 output_file.write("%s\n" % line)
 
 #compute and print the total number of titles included in the top k most common
@@ -63,21 +63,29 @@ line = "Total number of documents within the top " + str(k) + " most common titl
 output_file.write("%s\n" % line)
 output_file.write("\n\n")
 
-#print the top k most common titles
-for item in top_k:
-    output_file.write("%s\n" % str(item))
 
-#if a row is not grouped in the top_k most common titles, add it to throwback_titles for further ainalysis
-#if a row starts with 'Call ', also put it it in remaining_titles (we know this group is not well-formed)
+#if a row is not grouped in the top_k most common titles, add it to throwback_titles for further analysis
 top_k2 = counter.most_common(k2)
 test = False
+tb_count = 0
 for title,trunc in grouped_titles:
-    if title.startswith('Call ') == False:
-    	for top in top_k2:
-            if trunc == top[0]:
-	    	test = True
-	   	break
-    if test == False:
+   for top in top_k2:
+	if trunc == top[0]:
+   	    test = True
+	    break
+   if test == False:
 	new_csv2.write("%s\n" % title)
-    test = False
+	tb_count +=1
+   test = False
+
+
+#print a summary
+tot_docs = len(titles)
+org_docs = tot_docs - tb_count
+output_file.write("SUMMARY: We have " + str(tot_docs) + " documents. " + str(100.*org_docs/tot_docs) + "% of these may be organized into the following " + str(k2) + " groups. The remaining " + str(tb_count) + " documents...\n\n")
+
+#print the top k most common titles
+for item in top_k2:
+    line = item[0]+': ' + str(100.*item[1]/tot_docs) + '%'
+    output_file.write("%s\n" % line)
 
