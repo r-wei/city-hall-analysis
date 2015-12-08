@@ -9,7 +9,7 @@ k = 17 #print the top k most common truncated titles
 k2 = 17 #throw everything except those grouped in the top k2 truncated titles back in for analysis
 
 #print everything to these files
-output_file = open('test_results/title_stats5', 'w')
+output_file = open('../test_results/title_stats5', 'w')
 new_csv = open('remainingTitles.csv', 'w')
 new_csv2 = open('throwbackTitles.csv', 'w')
 
