@@ -6,10 +6,23 @@ import numpy as np
 from numpy import linalg
 from nltk.tokenize import RegexpTokenizer
 from scipy.cluster.vq import vq, kmeans2, whiten
+from scipy.cluster.vq import vq, kmeans2, whiten
+import psycopg2
 
-#read in and preprocess the titles
-input_file = open("communication_titles_01.csv", "rb")
-titles = [row[0] for row in csv.reader(input_file)] #list of strings of titles
+#Connect to the database
+try:
+    conn = psycopg2.connect("dbname='cityhallmonitor' user='' host='localhost' password=''")
+    print("Database Connected!")
+except:
+    print("I am unable to connect to the database")
+
+#Create a cursors, query a table, & save the results into a list.
+cur = conn.cursor()
+cur.execute("""SELECT text from cityhallmonitor_document""")
+rows = cur.fetchall()
+print("\nThere are {} rows in the queried table.".format(len(rows)))
+
+print(rows[0])
 
 #initialize some useful objects
 titles_list = [] #list of lists
@@ -38,13 +51,13 @@ col, row = 0, 0
 for title in titles_list:
     col = titles_list.index(title)
     for word in title:
-	row = keywords_index.index(word)
-	correlation_matrix[(row, col)]+=1
+        row = keywords_index.index(word)
+        correlation_matrix[(row, col)]+=1
 
 #print stats from the correlation matrix without any keywords removed
-print correlation_matrix.shape
-print "average # of keywords per doc: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per keyword (with multiplicity): " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0])
+print(correlation_matrix.shape)
+print("average # of keywords per doc: " + str(correlation_matrix.sum(axis=0).sum(axis=0)/j))
+print("average # of docs per keyword (with multiplicity): " + str(correlation_matrix.sum(axis=0).sum(axis=0)/correlation_matrix.shape[0]))
 
 
 #TWO: make new_corr_matrix and new_keywords_index of words
@@ -56,17 +69,17 @@ for row in correlation_matrix:
     row_list = list(row)
     word_freq = len(filter(lambda a: a != 0, row_list))
     if word_freq < wordfreq_upperbound and word_freq > wordfreq_lowerbound:
-	new_corr_list = new_corr_list + [row_list]
-	new_keywords_index = new_keywords_index + [keywords_index[i]]
+        new_corr_list = new_corr_list + [row_list]
+        new_keywords_index = new_keywords_index + [keywords_index[i]]
     i+=1
 
 new_corr_matrix = np.array(new_corr_list)
 	
 #print stats from the corr matrix after removing words
-print "--------------"
-print new_corr_matrix.shape
-print "average # of keywords per doc: " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/j)
-print "average # of docs per keyword (with multiplicity): " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/new_corr_matrix.shape[0])
+print("--------------")
+print(new_corr_matrix.shape)
+print("average # of keywords per doc: " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/j))
+print("average # of docs per keyword (with multiplicity): " + str(new_corr_matrix.sum(axis=0).sum(axis=0)/new_corr_matrix.shape[0]))
 
 
 #THREE: Analyze the rows of correlation_matrix:
@@ -77,9 +90,9 @@ pairs = []
 cutoff=2.8 #raising the cutoff above 3.4, we start to see phrases involving prepositions
 for i in range(num_rows):
     for j in range(num_rows - i-1):
-	#compute the Euclidean distance between 2 rows
-	if np.linalg.norm(new_corr_matrix[i] - new_corr_matrix[i+j+1]) < cutoff:
-	    pairs = pairs + [new_keywords_index[i] + ' ' + new_keywords_index[i+j+1]]
+    	#compute the Euclidean distance between 2 rows
+    	if np.linalg.norm(new_corr_matrix[i] - new_corr_matrix[i+j+1]) < cutoff:
+    	    pairs = pairs + [new_keywords_index[i] + ' ' + new_keywords_index[i+j+1]]
 
 #print the related words/pairs
 #In our example, we didn't do much better than nltk methods 
@@ -87,8 +100,8 @@ for i in range(num_rows):
 #Possible benefits of this method: don't have to look for common prepositional structures by hand;
 #good for finding related themes, but other methods were better for actually sorting documents
 for pair in pairs:
-    print pair
-print len(pairs)
+    print(pair)
+print(len(pairs))
 
 #FOUR: Analyze the columns of correlation_matrix:
 
@@ -117,7 +130,7 @@ for j in range(iterations):
     for i in range(6):
         group_counts[i] = assignments.count(i)
 
-    print group_counts, sum(group_counts) #prints number of documents per group, and the total number of docs grouped
+    print(group_counts, sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
 
 
 
