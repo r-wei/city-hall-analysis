@@ -104,8 +104,6 @@ print len(pairs)
 k=7 #number of document centroids, can play with this parameter
 new_corr_matrix_t = np.transpose(new_corr_matrix) #k-means works on rows
 
-
-#kmeans seems to give very disparate results
 iterations = 10 #number of times to run kmeans; can change
 group_counts = [0]*6
 

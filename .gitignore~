@@ -1,0 +1,9 @@
+requirements.txt
+natlangenv/
+.DS_Store
+test_results/
+cloudpull.py
+cloudTitles.py
+allDocs/
+joes_example.py
+quick_count.py
