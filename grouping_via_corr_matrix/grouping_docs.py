@@ -1,4 +1,4 @@
-#We apply ideas from ch 3 of Programming Collective Intelligence to titles from documents in city hall monitor.
+#We apply ideas from ch 3 of Programming Collective Intelligence to texts from documents in city hall monitor.
 #Namely, we construct the correlation matrix of keywords vs documents and see what that can teach us about organizing/grouping the documents.
 
 import csv, collections
@@ -11,7 +11,7 @@ import psycopg2
 
 #Connect to the database
 try:
-    conn = psycopg2.connect("dbname='cityhallmonitor' user='' host='localhost' password=''")
+    conn = psycopg2.connect("dbname='cityhallmonitor' user='Bomani' host='localhost' password='wolfbite1'")
     print("Database Connected!")
 except:
     print("I am unable to connect to the database")
@@ -19,15 +19,13 @@ except:
 #Create a cursors, query a table, & save the results into a list.
 cur = conn.cursor()
 cur.execute("""SELECT text from cityhallmonitor_document""")
-rows = cur.fetchall()
-print("\nThere are {} rows in the queried table.".format(len(rows)))
-
-print(rows[0])
+texts = cur.fetchall()
+print("\nThere are {} rows in the queried table.".format(len(texts)))
 
 #initialize some useful objects
-titles_list = [] #list of lists
-keywords = set() #set of all words in all titles
-j = len(titles) #number of documents
+texts_list = [] #list of lists
+keywords = set() #set of all words in all texts
+j = len(texts) #number of documents
 
 #can play with these bound parameters,
 #which tell us which keywords are too rare or too common to consider
@@ -36,11 +34,11 @@ wordfreq_lowerbound = 0.045*j
 
 tokenizer = RegexpTokenizer('\w+') #pick out alphanumeric sequences; discard punctuation, white space
 
-for title in titles:
+for text in texts:
     #use tokenizer to clean list of words: remove punctuation, decapitalize
-    title_words = map(str.lower,tokenizer.tokenize(title)) #each title is a list of words
-    titles_list = titles_list + [title_words]
-    keywords = keywords.union(set(title_words))
+    text_words = [item.rstrip('\n').lower() for item in tokenizer.tokenize(text[0])] #each text is a list of words from tuple
+    texts_list = texts_list + [text_words]
+    keywords = keywords.union(set(text_words))
 
 #initialize more objects
 keywords_index = list(keywords) #list of strings of keywords
@@ -48,9 +46,9 @@ correlation_matrix = np.zeros((len(keywords_index),j)) #matrix of keywords vs do
 col, row = 0, 0
 
 #ONE: create the correlation matrix
-for title in titles_list:
-    col = titles_list.index(title)
-    for word in title:
+for text in texts_list:
+    col = texts_list.index(text)
+    for word in text:
         row = keywords_index.index(word)
         correlation_matrix[(row, col)]+=1
 
