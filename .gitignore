@@ -3,6 +3,10 @@ natlangenv/
 .DS_Store
 cloudpull.py
 cloudTitles.py
+cloudTexts.py
+getDates.py
 allDocs/
 joes_example.py
 quick_count.py
+*~
+*.pyc
