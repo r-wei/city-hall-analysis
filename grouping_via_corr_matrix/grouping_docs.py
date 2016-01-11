@@ -18,7 +18,7 @@ except:
 
 #Create a cursors, query a table, & save the results into a list.
 cur = conn.cursor()
-cur.execute("""SELECT text from cityhallmonitor_document""")
+cur.execute("""SELECT text from cityhallmonitor_document limit 100""")
 texts = cur.fetchall()
 print("\nThere are {} rows in the queried table.".format(len(texts)))
 
@@ -65,7 +65,7 @@ new_corr_list = []
 new_keywords_index = []
 for row in correlation_matrix:
     row_list = list(row)
-    word_freq = len(filter(lambda a: a != 0, row_list))
+    word_freq = len(list(filter(lambda a: a != 0, row_list)))
     if word_freq < wordfreq_upperbound and word_freq > wordfreq_lowerbound:
         new_corr_list = new_corr_list + [row_list]
         new_keywords_index = new_keywords_index + [keywords_index[i]]
