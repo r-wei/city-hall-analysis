@@ -8,6 +8,7 @@ from nltk.tokenize import RegexpTokenizer
 from scipy.cluster.vq import vq, kmeans2, whiten
 from scipy.cluster.vq import vq, kmeans2, whiten
 import psycopg2
+import time
 
 #Connect to the database
 try:
@@ -18,7 +19,7 @@ except:
 
 #Create a cursors, query a table, & save the results into a list.
 cur = conn.cursor()
-cur.execute("""SELECT text from cityhallmonitor_document limit 100""")
+cur.execute("""SELECT text from cityhallmonitor_document limit 1000""")
 texts = cur.fetchall()
 print("\nThere are {} rows in the queried table.".format(len(texts)))
 
@@ -34,23 +35,36 @@ wordfreq_lowerbound = 0.045*j
 
 tokenizer = RegexpTokenizer('\w+') #pick out alphanumeric sequences; discard punctuation, white space
 
+progress = 0
 for text in texts:
     #use tokenizer to clean list of words: remove punctuation, decapitalize
     text_words = [item.rstrip('\n').lower() for item in tokenizer.tokenize(text[0])] #each text is a list of words from tuple
     texts_list = texts_list + [text_words]
     keywords = keywords.union(set(text_words))
+    if(progress % 100 == 0):
+        print("Tokenized Text Bodies: {}. \n Keyword Count: {}.".format(progress, len(keywords)))
+    progress = progress + 1
+print("Done Tokenizing Words!")
+
 
 #initialize more objects
 keywords_index = list(keywords) #list of strings of keywords
 correlation_matrix = np.zeros((len(keywords_index),j)) #matrix of keywords vs documents
 col, row = 0, 0
+print("Created an empty correlation matrix.")
 
+matrixProg = 0
 #ONE: create the correlation matrix
 for text in texts_list:
+    start = time.time()
     col = texts_list.index(text)
     for word in text:
         row = keywords_index.index(word)
         correlation_matrix[(row, col)]+=1
+    end = time.time()
+    if(matrixProg % 10 == 0):
+        print("Text Bodies Processed: {}. Time Required: {}.\n".format(matrixProg, end-start))
+    matrixProg = matrixProg + 1
 
 #print stats from the correlation matrix without any keywords removed
 print(correlation_matrix.shape)
@@ -127,12 +141,8 @@ for j in range(iterations):
     assignments = keyword_centroids[1].tolist()
     for i in range(6):
         group_counts[i] = assignments.count(i)
+    print(sorted(group_counts), sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
 
-<<<<<<< HEAD
-    print(group_counts, sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
-=======
-    print sorted(group_counts), sum(group_counts) #prints number of documents per group, and the total number of docs grouped
->>>>>>> fc0d748... revised groupingdocs.py
 
 
 
