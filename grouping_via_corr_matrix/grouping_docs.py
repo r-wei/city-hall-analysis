@@ -128,7 +128,11 @@ for j in range(iterations):
     for i in range(6):
         group_counts[i] = assignments.count(i)
 
+<<<<<<< HEAD
     print(group_counts, sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
+=======
+    print sorted(group_counts), sum(group_counts) #prints number of documents per group, and the total number of docs grouped
+>>>>>>> fc0d748... revised groupingdocs.py
 
 
 
