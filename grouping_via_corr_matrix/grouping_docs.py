@@ -134,42 +134,24 @@ new_corr_matrix_t = np.transpose(new_corr_matrix) #k-means works on rows
 #kmeans seems to give very disparate results
 iterations = 10 #number of times to run kmeans; can change
 group_counts = [0]*6
+smallest = 999999999
+bestCluster = []
+keyword_centroids = []
 
 classifier = KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1)
-classifier.fit(new_corr_matrix_t)
-keyword_centroids = classifier.cluster_centers_
-# for j in range(iterations):
-#     keyword_centroids = kmeans2(new_corr_matrix_t,k, minit='points')
-#     #print keyword_centroids #prints [list of centroids, list of centroid assignments]
+for j in range(iterations):
+    fit = classifier.fit(new_corr_matrix_t)
+    kc = classifier.cluster_centers_
+    if(fit.inertia_ < smallest):
+        bestCluster = fit
+        keyword_centroids = kc
+        smallest = fit.inertia_
+        print("Found a best on run {}.".format(j))
 
-#     assignments = keyword_centroids[1].tolist()
-#     for i in range(6):
-#         group_counts[i] = assignments.count(i)
-#     print(sorted(group_counts), sum(group_counts), keyword_centroids[0]) #prints number of documents per group, and the total number of docs grouped
+print(keyword_centroids)
+print(bestCluster)
+print("Found a smallest Inertia")
 
-print("kmeans ran")
-smallest = 999999999
-for i in range(7):
-    center = keyword_centroids[i]
-    center_array = np.array(center)
-    for next_center in keyword_centroids[i+1:]:
-        next_center_array = np.array(next_center)
-        distance = np.linalg.norm(center_array - next_center_array)
-        if distance < smallest:
-            smallest = distance
-
-print("found a smallest diameter")
-largest = 0
-for row in new_corr_matrix_t:
-    centroid = np.array(keyword_centroids[classifier.predict(row)])
-    distance = np.linalg.norm(centroid - row)
-    if distance > largest:
-        largest = distance
-
-print("found a largest diameter")
-
-if largest < smallest/3: 
-    print("We had a good run of kmeans")
 
 
 
