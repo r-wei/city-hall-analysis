@@ -7,6 +7,7 @@ from numpy import linalg
 from nltk.tokenize import RegexpTokenizer
 from scipy.cluster.vq import vq, kmeans2, whiten
 from scipy.cluster.vq import vq, kmeans2, whiten
+from sklearn.cluster import KMeans
 import psycopg2
 import time
 
@@ -19,7 +20,7 @@ except:
 
 #Create a cursors, query a table, & save the results into a list.
 cur = conn.cursor()
-cur.execute("""SELECT text from cityhallmonitor_document limit 1000""")
+cur.execute("""SELECT text from cityhallmonitor_document limit 100""")
 texts = cur.fetchall()
 print("\nThere are {} rows in the queried table.".format(len(texts)))
 
@@ -134,15 +135,41 @@ new_corr_matrix_t = np.transpose(new_corr_matrix) #k-means works on rows
 iterations = 10 #number of times to run kmeans; can change
 group_counts = [0]*6
 
-for j in range(iterations):
-    keyword_centroids = kmeans2(new_corr_matrix_t,k, minit='points')
-    #print keyword_centroids #prints [list of centroids, list of centroid assignments]
+classifier = KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1)
+classifier.fit(new_corr_matrix_t)
+keyword_centroids = classifier.cluster_centers_
+# for j in range(iterations):
+#     keyword_centroids = kmeans2(new_corr_matrix_t,k, minit='points')
+#     #print keyword_centroids #prints [list of centroids, list of centroid assignments]
 
-    assignments = keyword_centroids[1].tolist()
-    for i in range(6):
-        group_counts[i] = assignments.count(i)
-    print(sorted(group_counts), sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
+#     assignments = keyword_centroids[1].tolist()
+#     for i in range(6):
+#         group_counts[i] = assignments.count(i)
+#     print(sorted(group_counts), sum(group_counts), keyword_centroids[0]) #prints number of documents per group, and the total number of docs grouped
 
+print("kmeans ran")
+smallest = 999999999
+for i in range(7):
+    center = keyword_centroids[i]
+    center_array = np.array(center)
+    for next_center in keyword_centroids[i+1:]:
+        next_center_array = np.array(next_center)
+        distance = np.linalg.norm(center_array - next_center_array)
+        if distance < smallest:
+            smallest = distance
+
+print("found a smallest diameter")
+largest = 0
+for row in new_corr_matrix_t:
+    centroid = np.array(keyword_centroids[classifier.predict(row)])
+    distance = np.linalg.norm(centroid - row)
+    if distance > largest:
+        largest = distance
+
+print("found a largest diameter")
+
+if largest < smallest/3: 
+    print("We had a good run of kmeans")
 
 
 
