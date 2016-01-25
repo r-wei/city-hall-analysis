@@ -22,34 +22,34 @@ def ordinance_parser(row):
 	
       	    return row_trunc 
 
-def group_titles(titles, documents):
+def group_titles(documentDict):
 #groups documents by title
 #returns [k most common title groups, remaining unsorted documents]
 
     trunc_titles = []
     remaining_docs = []
     indices = []
-    
-    #truncate each title using ordinance algorithm
-    for row in titles:
-        result = ordinance_parser(row)
+
+    keys = documentDict.keys()
+
+    for key in keys:
+        title, text = documentDict[key]
+   	#truncate each title using ordinance algorithm
+        trunc_title = ordinance_parser(title)
+        documentDict[key] = (title, text, trunc_title)
+
         trunc_titles = trunc_titles + [result]
 
     #count trunc_titles and pick out k most common
     counter = collections.Counter(trunc_titles)
     k = 17
     top_k = counter.most_common(k)
-    top_titles = []
-    for title, count in top_k:
-        top_titles = top_titles + [title]
 
-    #if a title is not in the k most common, return the document for further sorting
-    for j in range(len(trunc_titles)):
-        if trunc_titles[j] in top_titles:
-            continue
+    for key in keys:
+        title, text, trunc = documentDict[key]
+        if trunc in top_k:
+            documentDict[key] = (title, text, trunc_title, True)
         else:
-            remaining_docs = remaining_docs + [documents[j]]
-            indices = indices + [j]
+            documentDict[key] = (title, text, trunc_title, False)
 
-    result = [top_k] + [remaining_docs] + [indices]
-    return result
+    return documentDict
