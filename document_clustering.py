@@ -114,6 +114,16 @@ if len(args) > 0:
     op.error("this script takes no arguments.")
     sys.exit(1)
 
+###############################################################################
+
+#Function for clearly printing a dictionary's values
+def dictPrint(dictIn):
+  try: 
+    for attribute, value in dictIn.items():
+      print('{} : {}'.format(attribute, value))
+    print('\n')
+  except:
+    f1.write('\n =============================== \n PRINTING ISSUE \n =============================== \n')
 
 ###############################################################################
 print("loading city hall monitor documents")
@@ -129,17 +139,21 @@ except:
 
 cur = conn.cursor()
 t0 = time()
-cur.execute('select title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
-for row in cur:
-    titles.append(row[0])
-    documents.append(row[1])
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+# for row in cur:
+#     titles.append(row[0])
+#     documents.append(row[1]
 
-print("%d documents" % len(documents))
+documentDict = {}
+for row in cur:
+  documentDict[row[0]] = (row[1], row[2])
+
+print("%d documents" % len(documentDict.keys()))
 print()
 print("done in %fs" % (time() - t0))
 
 t0 = time()
-result = group_titles(titles, documents)
+result = group_titles(documentDict)
 top_k = result[0] #list of (title group, count) pairs
 remaining_docs = result[1] #list of remaining unsorted documents
 print(top_k)
