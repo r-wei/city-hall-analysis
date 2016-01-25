@@ -7,9 +7,7 @@ from numpy import linalg
 from nltk.tokenize import RegexpTokenizer
 from scipy.cluster.vq import vq, kmeans2, whiten
 from scipy.cluster.vq import vq, kmeans2, whiten
-from sklearn.cluster import KMeans
 import psycopg2
-import time
 
 #Connect to the database
 try:
@@ -36,36 +34,23 @@ wordfreq_lowerbound = 0.045*j
 
 tokenizer = RegexpTokenizer('\w+') #pick out alphanumeric sequences; discard punctuation, white space
 
-progress = 0
 for text in texts:
     #use tokenizer to clean list of words: remove punctuation, decapitalize
     text_words = [item.rstrip('\n').lower() for item in tokenizer.tokenize(text[0])] #each text is a list of words from tuple
     texts_list = texts_list + [text_words]
     keywords = keywords.union(set(text_words))
-    if(progress % 100 == 0):
-        print("Tokenized Text Bodies: {}. \n Keyword Count: {}.".format(progress, len(keywords)))
-    progress = progress + 1
-print("Done Tokenizing Words!")
-
 
 #initialize more objects
 keywords_index = list(keywords) #list of strings of keywords
 correlation_matrix = np.zeros((len(keywords_index),j)) #matrix of keywords vs documents
 col, row = 0, 0
-print("Created an empty correlation matrix.")
 
-matrixProg = 0
 #ONE: create the correlation matrix
 for text in texts_list:
-    start = time.time()
     col = texts_list.index(text)
     for word in text:
         row = keywords_index.index(word)
         correlation_matrix[(row, col)]+=1
-    end = time.time()
-    if(matrixProg % 10 == 0):
-        print("Text Bodies Processed: {}. Time Required: {}.\n".format(matrixProg, end-start))
-    matrixProg = matrixProg + 1
 
 #print stats from the correlation matrix without any keywords removed
 print(correlation_matrix.shape)
@@ -134,24 +119,16 @@ new_corr_matrix_t = np.transpose(new_corr_matrix) #k-means works on rows
 #kmeans seems to give very disparate results
 iterations = 10 #number of times to run kmeans; can change
 group_counts = [0]*6
-smallest = 999999999
-bestCluster = []
-keyword_centroids = []
 
-classifier = KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1)
 for j in range(iterations):
-    fit = classifier.fit(new_corr_matrix_t)
-    kc = classifier.cluster_centers_
-    if(fit.inertia_ < smallest):
-        bestCluster = fit
-        keyword_centroids = kc
-        smallest = fit.inertia_
-        print("Found a best on run {}.".format(j))
+    keyword_centroids = kmeans2(new_corr_matrix_t,k, minit='points')
+    #print keyword_centroids #prints [list of centroids, list of centroid assignments]
 
-print(keyword_centroids)
-print(bestCluster)
-print("Found a smallest Inertia")
-print(sorted(group_counts), sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
+    assignments = keyword_centroids[1].tolist()
+    for i in range(6):
+        group_counts[i] = assignments.count(i)
+    print(sorted(group_counts), sum(group_counts)) #prints number of documents per group, and the total number of docs grouped
+
 
 
 
