@@ -132,18 +132,18 @@ documents = []
 titles = []
 #Connect to the database
 try:
-    conn = psycopg2.connect("dbname='cityhallmonitor' user='Bomani' host='localhost' password='wolfbite1'")
+    conn = psycopg2.connect(database='cityhallmonitor',user='cityhallmonitor',password='cityhallmonitor',host='localhost')
+           #psycopg2.connect("dbname='cityhallmonitor' user='Bomani' host='localhost' password='wolfbite1'")
     print("Database Connected!")
 except:
     print("I am unable to connect to the database")
 
 cur = conn.cursor()
 t0 = time()
-cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
-# for row in cur:
-#     titles.append(row[0])
-#     documents.append(row[1]
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
+#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
+#make a dictionary of keys:values - matter_id:(title, text)
 documentDict = {}
 for row in cur:
   documentDict[row[0]] = (row[1], row[2])
@@ -153,11 +153,18 @@ print()
 print("done in %fs" % (time() - t0))
 
 t0 = time()
-result = group_titles(documentDict)
-top_k = result[0] #list of (title group, count) pairs
-remaining_docs = result[1] #list of remaining unsorted documents
-print(top_k)
-print("There are " + str(len(remaining_docs)) + " documents remaining.")
+documentDict = group_titles(documentDict) #returns a dictionary of matter_id: (title, text, truncated_title, T/F is_this_doc_grouped_via_title_analysis)
+keys = documentDict.keys()
+
+#create a dictionary of docs not organized by title analysis
+remaining_docs = dict()
+for key in keys:
+    if documentDict[key][3] == False:
+        remaining_docs[key] = documentDict[key]
+
+remaining_keys = list(remaining_docs.keys())
+
+print("There are " + str(len(remaining_keys)) + " documents remaining.")
 print("Title analysis done in %fs" % (time() - t0))
 
 labels = None # not sure what the analog to labels is for our dataset
@@ -181,7 +188,12 @@ else:
     vectorizer = TfidfVectorizer(max_df=0.3, max_features=opts.n_features,
                                  min_df=0.2, stop_words='english',
                                  use_idf=opts.use_idf)#still produces some really big non-meaningful groups
-X = vectorizer.fit_transform(remaining_docs)
+
+remaining_text = []
+for key in remaining_keys:
+    remaining_text = remaining_text + [remaining_docs[key][1]]
+
+X = vectorizer.fit_transform(remaining_text) #run kmeans on text of remaining_docs only
 
 print("done in %fs" % (time() - t0))
 print("n_samples: %d, n_features: %d" % X.shape)
@@ -237,12 +249,18 @@ else:
 
 print()
 
-
+#add centroid assignment to remaining_docs dictionary
 centroid_labels = km.labels_
+for j in range(len(centroid_labels)):
+    tup = centroid_labels[j], 
+    remaining_docs[remaining_keys[j]] = remaining_docs[remaining_keys[j]] + tup 
+
 counter = collections.Counter(centroid_labels)
 
+t0 = time()
 if not opts.use_hashing:
-    print("Top terms per cluster:")
+    res_file = open('cluster_results', 'w')
+    res_file.write("Top terms per cluster:")
 
     if opts.n_components:
         original_space_centroids = svd.inverse_transform(km.cluster_centers_)
@@ -251,27 +269,31 @@ if not opts.use_hashing:
         order_centroids = km.cluster_centers_.argsort()[:, ::-1]
 
     terms = vectorizer.get_feature_names()
+    centroids = km.cluster_centers_
     for i in range(true_k):
-        print("Cluster %d:" % i, end='')
+        res_file.write("\n Cluster %d:" % i)
         for ind in order_centroids[i, :10]:
-            print(' %s' % terms[ind], end='')
-        print('\t - \t %d docs' % counter[i])
+            res_file.write(' %s' % terms[ind])
+        res_file.write('\t - \t %d docs' % counter[i])
 
+	#print titles of the 5 docs closest to the centroid
+        distances = (np.power(X.todense() - centroids[i],2)).sum(axis=1)
+        order_dist = np.argsort(distances, axis=0)
+        for j in range(5):
+            res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[j]]][0]) #print jth closest doc to centroid
+            res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[-j]]][0]) #print jth furthest doc
+    res_file.close()
 
-print(km.labels_)
-print(set(km.labels_))
-print(len(km.labels_))
-
-for i in range(0,len(remaining_docs)):
-  label = km.labels_[i]
+for key in remaining_keys:
+  label = remaining_docs[key][4]
   # Write txt to file
   directory = 'newClusters/cluster-{}'.format(label)
   if not os.path.exists(directory):
     os.makedirs(directory)
 
-  filename = directory + '/{}.txt'.format(i)
+  filename = directory + '/{}.txt'.format(key)
   file_ = open(filename, 'w')
-  file_.write(remaining_docs[i])
+  file_.write(remaining_docs[key][1])
   file_.close()
 
-
+print("done writing to files in %fs" % (time() - t0))

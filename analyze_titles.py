@@ -38,18 +38,23 @@ def group_titles(documentDict):
         trunc_title = ordinance_parser(title)
         documentDict[key] = (title, text, trunc_title)
 
-        trunc_titles = trunc_titles + [result]
+        trunc_titles = trunc_titles + [trunc_title]
 
     #count trunc_titles and pick out k most common
     counter = collections.Counter(trunc_titles)
     k = 17
+
     top_k = counter.most_common(k)
+    top_titles = []
+    for top, count in top_k:
+        top_titles = top_titles + [top]
 
     for key in keys:
         title, text, trunc = documentDict[key]
-        if trunc in top_k:
+        if trunc in top_titles:
             documentDict[key] = (title, text, trunc_title, True)
         else:
             documentDict[key] = (title, text, trunc_title, False)
 
+    print(top_k)
     return documentDict
