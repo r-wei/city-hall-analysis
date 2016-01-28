@@ -81,6 +81,7 @@ import collections
 
 import os
 
+
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
@@ -140,8 +141,8 @@ except:
 
 cur = conn.cursor()
 t0 = time()
-cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
-#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+# cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
 #make a dictionary of keys:values - matter_id:(title, text)
 documentDict = {}
@@ -297,3 +298,18 @@ for key in remaining_keys:
   file_.close()
 
 print("done writing to files in %fs" % (time() - t0))
+
+
+#Run Analysis on Clusters
+for i in range(true_k):
+  clusterDict = {}
+  for key in remaining_keys:
+    if(remaining_docs[key][4] == i):
+      clusterDict[key] = remaining_docs[key]
+
+  print('\n#################################')
+  print('########## Cluster {} ###########'.format(i))
+  print('#################################\n')
+  analyzedCluster = group_titles(clusterDict)
+  print('\n')
+

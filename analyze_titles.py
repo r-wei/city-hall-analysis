@@ -1,4 +1,6 @@
-import re, collections
+import re, collections, pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 #Ordinance Algorithm: For each title,
 #1) find the first instance of either ' for '  or ' No. ', and truncate
@@ -33,7 +35,7 @@ def group_titles(documentDict):
     keys = documentDict.keys()
 
     for key in keys:
-        title, text = documentDict[key]
+        title, text = documentDict[key][0:2]
    	#truncate each title using ordinance algorithm
         trunc_title = ordinance_parser(title)
         documentDict[key] = (title, text, trunc_title)
@@ -56,5 +58,5 @@ def group_titles(documentDict):
         else:
             documentDict[key] = (title, text, trunc_title, False)
 
-    print(top_k)
+    pp.pprint(top_k)
     return documentDict
