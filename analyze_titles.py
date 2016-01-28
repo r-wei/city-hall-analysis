@@ -48,8 +48,10 @@ def group_titles(documentDict):
 
     top_k = counter.most_common(k)
     top_titles = []
+    total = 0
     for top, count in top_k:
         top_titles = top_titles + [top]
+        total = total + count
 
     for key in keys:
         title, text, trunc = documentDict[key]
@@ -58,5 +60,6 @@ def group_titles(documentDict):
         else:
             documentDict[key] = (title, text, trunc_title, False)
 
+    pp.pprint('No. of docs organized by title analysis: ' + str(total))
     pp.pprint(top_k)
     return documentDict

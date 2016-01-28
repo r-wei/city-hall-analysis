@@ -141,8 +141,8 @@ except:
 
 cur = conn.cursor()
 t0 = time()
-# cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
-cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
+#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
 #make a dictionary of keys:values - matter_id:(title, text)
 documentDict = {}
@@ -260,6 +260,7 @@ counter = collections.Counter(centroid_labels)
 
 t0 = time()
 if not opts.use_hashing:
+    #for each cluster, write the top 10 keywords, 5 titles closest & furthest from the centroid to res_file
     res_file = open('cluster_results', 'w')
     res_file.write("Top terms per cluster:")
 
@@ -310,6 +311,7 @@ for i in range(true_k):
   print('\n#################################')
   print('########## Cluster {} ###########'.format(i))
   print('#################################\n')
+  print('No. of docs: ' + str(len(list(clusterDict.keys()))))
   analyzedCluster = group_titles(clusterDict)
   print('\n')
 
