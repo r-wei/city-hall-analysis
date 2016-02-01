@@ -77,6 +77,7 @@ import numpy as np
 import psycopg2
 
 from analyze_titles import *
+from compileDicts import * 
 import collections
 
 import os
@@ -141,8 +142,8 @@ except:
 
 cur = conn.cursor()
 t0 = time()
-cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
-#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
 #make a dictionary of keys:values - matter_id:(title, text)
 documentDict = {}
@@ -168,150 +169,179 @@ remaining_keys = list(remaining_docs.keys())
 print("There are " + str(len(remaining_keys)) + " documents remaining.")
 print("Title analysis done in %fs" % (time() - t0))
 
-labels = None # not sure what the analog to labels is for our dataset
-true_k = 20 # is there a smarter way to get this from our documents?
+documentDict2 = group_titles(remaining_docs)
+keys2 = documentDict2.keys()
+#create a dictionary of docs not organized by title analysis
+remaining_docs2 = dict()
+for key in keys2:
+    if documentDict2[key][3] == False:
+        remaining_docs2[key] = documentDict2[key]
 
-print("Extracting features from the training dataset using a sparse vectorizer")
-t0 = time()
-if opts.use_hashing:
-    if opts.use_idf:
-        # Perform an IDF normalization on the output of HashingVectorizer
-        hasher = HashingVectorizer(n_features=opts.n_features,
-                                   stop_words='english', non_negative=True,
-                                   norm=None, binary=False)
-        vectorizer = make_pipeline(hasher, TfidfTransformer())
-    else:
-        vectorizer = HashingVectorizer(n_features=opts.n_features,
-                                       stop_words='english',
-                                       non_negative=False, norm='l2',
-                                       binary=False)
-else:
-    vectorizer = TfidfVectorizer(max_df=0.3, max_features=opts.n_features,
-                                 min_df=0.2, stop_words='english',
-                                 use_idf=opts.use_idf)#still produces some really big non-meaningful groups
+remaining_keys2 = list(remaining_docs2.keys())
 
-remaining_text = []
-for key in remaining_keys:
-    remaining_text = remaining_text + [remaining_docs[key][1]]
-
-X = vectorizer.fit_transform(remaining_text) #run kmeans on text of remaining_docs only
-
-print("done in %fs" % (time() - t0))
-print("n_samples: %d, n_features: %d" % X.shape)
-print()
-
-if opts.n_components:
-    print("Performing dimensionality reduction using LSA")
-    t0 = time()
-    # Vectorizer results are normalized, which makes KMeans behave as
-    # spherical k-means for better results. Since LSA/SVD results are
-    # not normalized, we have to redo the normalization.
-    svd = TruncatedSVD(opts.n_components)
-    normalizer = Normalizer(copy=False)
-    lsa = make_pipeline(svd, normalizer)
-
-    X = lsa.fit_transform(X)
-
-    print("done in %fs" % (time() - t0))
-
-    explained_variance = svd.explained_variance_ratio_.sum()
-    print("Explained variance of the SVD step: {}%".format(
-        int(explained_variance * 100)))
-
-    print()
+print("There are " + str(len(remaining_keys2)) + " documents remaining.")
+print("Title analysis done in %fs" % (time() - t0))
 
 
-###############################################################################
-# Do the actual clustering
+documentDict3 = group_titles(remaining_docs2)
+keys3 = documentDict3.keys()
+#create a dictionary of docs not organized by title analysis
+remaining_docs3 = dict()
+for key in keys3:
+    if documentDict3[key][3] == False:
+        remaining_docs3[key] = documentDict3[key]
 
-if opts.minibatch:
-    km = MiniBatchKMeans(n_clusters=true_k, init='k-means++', n_init=1,
-                         init_size=1000, batch_size=1000, verbose=opts.verbose)
-else:
-    km = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1,
-                verbose=opts.verbose)
+remaining_keys3 = list(remaining_docs3.keys())
 
-print("Clustering sparse data with %s" % km)
-t0 = time()
-km.fit(X)
-print("done in %0.3fs" % (time() - t0))
-print()
+print("There are " + str(len(remaining_keys3)) + " documents remaining.")
+print("Title analysis done in %fs" % (time() - t0))
 
-if labels:
-    print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels, km.labels_))
-    print("Completeness: %0.3f" % metrics.completeness_score(labels, km.labels_))
-    print("V-measure: %0.3f" % metrics.v_measure_score(labels, km.labels_))
-    print("Adjusted Rand-Index: %.3f"
-          % metrics.adjusted_rand_score(labels, km.labels_))
-    print("Silhouette Coefficient: %0.3f"
-          % metrics.silhouette_score(X, km.labels_, sample_size=1000))
-else:
-    print("Can't compute accuracy metrics without labels")
+compileDictionaries(documentDict, documentDict2, documentDict3)
 
-print()
+# labels = None # not sure what the analog to labels is for our dataset
+# true_k = 35 # is there a smarter way to get this from our documents?
 
-#add centroid assignment to remaining_docs dictionary
-centroid_labels = km.labels_
-for j in range(len(centroid_labels)):
-    tup = centroid_labels[j], 
-    remaining_docs[remaining_keys[j]] = remaining_docs[remaining_keys[j]] + tup 
+# print("Extracting features from the training dataset using a sparse vectorizer")
+# t0 = time()
+# if opts.use_hashing:
+#     if opts.use_idf:
+#         # Perform an IDF normalization on the output of HashingVectorizer
+#         hasher = HashingVectorizer(n_features=opts.n_features,
+#                                    stop_words='english', non_negative=True,
+#                                    norm=None, binary=False)
+#         vectorizer = make_pipeline(hasher, TfidfTransformer())
+#     else:
+#         vectorizer = HashingVectorizer(n_features=opts.n_features,
+#                                        stop_words='english',
+#                                        non_negative=False, norm='l2',
+#                                        binary=False)
+# else:
+#     vectorizer = TfidfVectorizer(max_df=0.3, max_features=opts.n_features,
+#                                  min_df=0.2, stop_words='english',
+#                                  use_idf=opts.use_idf)#still produces some really big non-meaningful groups
 
-counter = collections.Counter(centroid_labels)
+# remaining_text = []
+# for key in remaining_keys:
+#     remaining_text = remaining_text + [remaining_docs[key][1]]
 
-t0 = time()
-if not opts.use_hashing:
-    #for each cluster, write the top 10 keywords, 5 titles closest & furthest from the centroid to res_file
-    res_file = open('cluster_results', 'w')
-    res_file.write("Top terms per cluster:")
+# X = vectorizer.fit_transform(remaining_text) #run kmeans on text of remaining_docs only
 
-    if opts.n_components:
-        original_space_centroids = svd.inverse_transform(km.cluster_centers_)
-        order_centroids = original_space_centroids.argsort()[:, ::-1]
-    else:
-        order_centroids = km.cluster_centers_.argsort()[:, ::-1]
+# print("done in %fs" % (time() - t0))
+# print("n_samples: %d, n_features: %d" % X.shape)
+# print()
 
-    terms = vectorizer.get_feature_names()
-    centroids = km.cluster_centers_
-    for i in range(true_k):
-        res_file.write("\n Cluster %d:" % i)
-        for ind in order_centroids[i, :10]:
-            res_file.write(' %s' % terms[ind])
-        res_file.write('\t - \t %d docs' % counter[i])
+# if opts.n_components:
+#     print("Performing dimensionality reduction using LSA")
+#     t0 = time()
+#     # Vectorizer results are normalized, which makes KMeans behave as
+#     # spherical k-means for better results. Since LSA/SVD results are
+#     # not normalized, we have to redo the normalization.
+#     svd = TruncatedSVD(opts.n_components)
+#     normalizer = Normalizer(copy=False)
+#     lsa = make_pipeline(svd, normalizer)
 
-	#print titles of the 5 docs closest to the centroid
-        distances = (np.power(X.todense() - centroids[i],2)).sum(axis=1)
-        order_dist = np.argsort(distances, axis=0)
-        for j in range(5):
-            res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[j]]][0]) #print jth closest doc to centroid
-            res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[-j]]][0]) #print jth furthest doc
-    res_file.close()
+#     X = lsa.fit_transform(X)
 
-for key in remaining_keys:
-  label = remaining_docs[key][4]
-  # Write txt to file
-  directory = 'newClusters/cluster-{}'.format(label)
-  if not os.path.exists(directory):
-    os.makedirs(directory)
+#     print("done in %fs" % (time() - t0))
 
-  filename = directory + '/{}.txt'.format(key)
-  file_ = open(filename, 'w')
-  file_.write(remaining_docs[key][1])
-  file_.close()
+#     explained_variance = svd.explained_variance_ratio_.sum()
+#     print("Explained variance of the SVD step: {}%".format(
+#         int(explained_variance * 100)))
 
-print("done writing to files in %fs" % (time() - t0))
+#     print()
 
 
-#Run Analysis on Clusters
-for i in range(true_k):
-  clusterDict = {}
-  for key in remaining_keys:
-    if(remaining_docs[key][4] == i):
-      clusterDict[key] = remaining_docs[key]
+# ###############################################################################
+# # Do the actual clustering
 
-  print('\n#################################')
-  print('########## Cluster {} ###########'.format(i))
-  print('#################################\n')
-  print('No. of docs: ' + str(len(list(clusterDict.keys()))))
-  analyzedCluster = group_titles(clusterDict)
-  print('\n')
+# if opts.minibatch:
+#     km = MiniBatchKMeans(n_clusters=true_k, init='k-means++', n_init=1,
+#                          init_size=1000, batch_size=1000, verbose=opts.verbose)
+# else:
+#     km = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1,
+#                 verbose=opts.verbose)
+
+# print("Clustering sparse data with %s" % km)
+# t0 = time()
+# km.fit(X)
+# print("done in %0.3fs" % (time() - t0))
+# print()
+
+# if labels:
+#     print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels, km.labels_))
+#     print("Completeness: %0.3f" % metrics.completeness_score(labels, km.labels_))
+#     print("V-measure: %0.3f" % metrics.v_measure_score(labels, km.labels_))
+#     print("Adjusted Rand-Index: %.3f"
+#           % metrics.adjusted_rand_score(labels, km.labels_))
+#     print("Silhouette Coefficient: %0.3f"
+#           % metrics.silhouette_score(X, km.labels_, sample_size=1000))
+# else:
+#     print("Can't compute accuracy metrics without labels")
+
+# print()
+
+# #add centroid assignment to remaining_docs dictionary
+# centroid_labels = km.labels_
+# for j in range(len(centroid_labels)):
+#     tup = centroid_labels[j], 
+#     remaining_docs[remaining_keys[j]] = remaining_docs[remaining_keys[j]] + tup 
+
+# counter = collections.Counter(centroid_labels)
+
+# t0 = time()
+# if not opts.use_hashing:
+#     #for each cluster, write the top 10 keywords, 5 titles closest & furthest from the centroid to res_file
+#     res_file = open('cluster_results', 'w')
+#     res_file.write("Top terms per cluster:")
+
+#     if opts.n_components:
+#         original_space_centroids = svd.inverse_transform(km.cluster_centers_)
+#         order_centroids = original_space_centroids.argsort()[:, ::-1]
+#     else:
+#         order_centroids = km.cluster_centers_.argsort()[:, ::-1]
+
+#     terms = vectorizer.get_feature_names()
+#     centroids = km.cluster_centers_
+#     for i in range(true_k):
+#         res_file.write("\n Cluster %d:" % i)
+#         for ind in order_centroids[i, :10]:
+#             res_file.write(' %s' % terms[ind])
+#         res_file.write('\t - \t %d docs' % counter[i])
+
+# 	#print titles of the 5 docs closest to the centroid
+#         distances = (np.power(X.todense() - centroids[i],2)).sum(axis=1)
+#         order_dist = np.argsort(distances, axis=0)
+#         for j in range(5):
+#             res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[j]]][0]) #print jth closest doc to centroid
+#             res_file.write('\n \t'+ remaining_docs[remaining_keys[order_dist[-j]]][0]) #print jth furthest doc
+#     res_file.close()
+
+# for key in remaining_keys:
+#   label = remaining_docs[key][4]
+#   # Write txt to file
+#   directory = 'newClusters/cluster-{}'.format(label)
+#   if not os.path.exists(directory):
+#     os.makedirs(directory)
+
+#   filename = directory + '/{}.txt'.format(key)
+#   file_ = open(filename, 'w')
+#   file_.write(remaining_docs[key][1])
+#   file_.close()
+
+# print("done writing to files in %fs" % (time() - t0))
+
+
+# #Run Analysis on Clusters
+# for i in range(true_k):
+#   clusterDict = {}
+#   for key in remaining_keys:
+#     if(remaining_docs[key][4] == i):
+#       clusterDict[key] = remaining_docs[key]
+
+#   print('\n#################################')
+#   print('########## Cluster {} ###########'.format(i))
+#   print('#################################\n')
+#   print('No. of docs: ' + str(len(list(clusterDict.keys()))))
+#   analyzedCluster = group_titles(clusterDict)
+#   print('\n')
 
