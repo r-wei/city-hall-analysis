@@ -56,9 +56,9 @@ def group_titles(documentDict):
     for key in keys:
         title, text, trunc = documentDict[key]
         if trunc in top_titles:
-            documentDict[key] = (title, text, trunc_title, True)
+            documentDict[key] = (title, text, trunc, True, top_titles.index(trunc))
         else:
-            documentDict[key] = (title, text, trunc_title, False)
+            documentDict[key] = (title, text, trunc, False, -1)
 
     pp.pprint('No. of docs organized by title analysis: ' + str(total))
     pp.pprint(top_k)
