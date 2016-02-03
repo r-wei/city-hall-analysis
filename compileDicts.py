@@ -31,8 +31,8 @@ def compileDictionaries(dict1, dict2, dict3):
 		if(dict3[key][4] == 3):
 			tup = dict3[key][:4] +  (3,) 
 			dict1[key] = tup
-		elif(dict3[key][4] == 11):
-			tup = dict3[key][:4] +  (12,) 
+		elif(dict3[key][4] == 10):
+			tup = dict3[key][:4] +  (1,) 
 			dict1[key] = tup
 		elif(dict3[key][4] == 12):
 			tup = dict3[key][:4] +  (15,) 
@@ -41,9 +41,40 @@ def compileDictionaries(dict1, dict2, dict3):
 			tup = dict3[key][:4] +  (31,) 
 			dict1[key] = tup
 		elif(dict3[key][4] != -1):
-			newIndex = dict3[key][4]+32
+			newIndex = dict3[key][4]+33
 			tup = dict3[key][:4] +  (newIndex,) 
 			dict1[key] = tup
+
+	keys1 = dict1.keys()
+	for key in keys1:
+		if(dict1[key][4] in [0,2,4,9,11]):
+			tup = dict1[key][:4] +  (0,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [1, 12]):
+			tup = dict1[key][:4] +  (1,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [10,13,22,30,32,35,38]):
+			tup = dict1[key][:4] +  (2,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [5,15,16,21,29,40,33,42,44]):
+			tup = dict1[key][:4] +  (3,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [6,8,19]):
+			tup = dict1[key][:4] +  (4,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [3,14,31,47,49]):
+			tup = dict1[key][:4] +  (5,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [7,18]):
+			tup = dict1[key][:4] +  (6,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [26,46]):
+			tup = dict1[key][:4] +  (7,)
+			dict1[key] = tup
+		elif(dict1[key][4] in [34,37,39]):
+			tup = dict1[key][:4] +  (8,)
+			dict1[key] = tup
+				
 
 	#dict_index[integer index] = set of truncated titles with this index
 	dict_index = dict()

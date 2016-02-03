@@ -197,7 +197,10 @@ print("There are " + str(len(remaining_keys3)) + " documents remaining.")
 print("Title analysis done in %fs" % (time() - t0))
 
 result = compileDictionaries(documentDict, documentDict2, documentDict3)
+
 dictPrint(result[1])
+file_ = open("cluster_results.txt", "w")
+file_.write(dictPrint(result[1]))
 
 # labels = None # not sure what the analog to labels is for our dataset
 # true_k = 35 # is there a smarter way to get this from our documents?
