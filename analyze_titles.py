@@ -1,4 +1,5 @@
 import re, collections, pprint
+from time import time
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -24,9 +25,11 @@ def ordinance_parser(row):
 	
       	    return row_trunc 
 
-def group_titles(documentDict):
 #groups documents by title
-#returns [k most common title groups, remaining unsorted documents]
+#Consider only the documents within the top k most common trunc_titles to be grouped
+#and indicate them with (title, text, trunc_title, TRUE, integer index of group).
+#Ungrouped docs are indicated: (title, text, trunc_title, FALSE, -1).
+def group_titles(documentDict):
 
     trunc_titles = []
     remaining_docs = []
@@ -61,5 +64,25 @@ def group_titles(documentDict):
             documentDict[key] = (title, text, trunc, False, -1)
 
     pp.pprint('No. of docs organized by title analysis: ' + str(total))
-    pp.pprint(top_k)
+    #pp.pprint(top_k)
     return documentDict
+
+#given a grouped dictionary, separate out the sorted titles and the unsorted ones
+def title_analysis(startDict):
+
+	t0 = time()
+	groupedDict = group_titles(startDict) #returns a dictionary of matter_id: (title, text, truncated_title, T/F is_this_doc_grouped_via_title_analysis, integer trunc_title_index)
+	groupedkeys = groupedDict.keys()
+
+	#create a dictionary of docs not organized by title analysis
+	remainingDict = dict()
+	for key in groupedkeys:
+		if groupedDict[key][3] == False:
+			remainingDict[key] = groupedDict[key]
+
+	remainingkeys = list(remainingDict.keys())
+
+	print("There are " + str(len(remainingkeys)) + " documents remaining.")
+	print("Title analysis done in %fs" % (time() - t0))
+
+	return(groupedDict, remainingDict)
