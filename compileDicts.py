@@ -22,22 +22,41 @@ def compileDictionaries(dict1, dict2, dict3):
 			tup = dict2[key][:4] +  (1,) 
 			dict1[key] = tup
 
-		elif(dict2[key][4] != 0 and dict2[key][4] != 4):
+		elif(dict2[key][4] != 0 and dict2[key][4] != 4 and dict2[key][4] != -1):
 			newIndex = dict2[key][4]+16
 			tup = dict2[key][:4] +  (newIndex,) 
 			dict1[key] = tup
 
-	trunc_titles = []
-	indices = []
+	for key in keys3:
+		if(dict3[key][4] == 3):
+			tup = dict3[key][:4] +  (3,) 
+			dict1[key] = tup
+		elif(dict3[key][4] == 11):
+			tup = dict3[key][:4] +  (12,) 
+			dict1[key] = tup
+		elif(dict3[key][4] == 12):
+			tup = dict3[key][:4] +  (15,) 
+			dict1[key] = tup
+		elif(dict3[key][4] == 15):
+			tup = dict3[key][:4] +  (31,) 
+			dict1[key] = tup
+		elif(dict3[key][4] != -1):
+			newIndex = dict3[key][4]+32
+			tup = dict3[key][:4] +  (newIndex,) 
+			dict1[key] = tup
+
+	#dict_index[integer index] = set of truncated titles with this index
+	dict_index = dict()
 	for key in dict1.keys():
-		trunc_titles.append(dict1[key][2])
-		indices.append(dict1[key][4])
+		trunc = dict1[key][2]
+		index = dict1[key][4]
+		if index != -1:
+			if index in dict_index.keys():
+				dict_index[index] = dict_index[index].union({trunc})
+			else:
+				dict_index[index] = {trunc}
 
-	print(collections.Counter(trunc_titles))
-	print(collections.Counter(indices))
-
-
-	return(dict1)
+	return(dict1, dict_index)
 
 
 

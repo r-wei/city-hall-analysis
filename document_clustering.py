@@ -4,7 +4,7 @@ adapted to work with documents from City Hall Monitor
 =======================================
 Clustering text documents using k-means
 =======================================
-
+.
 This is an example showing how the scikit-learn can be used to cluster
 documents by topics using a bag-of-words approach. This example uses
 a scipy.sparse matrix to store the features instead of standard numpy arrays.
@@ -142,8 +142,8 @@ except:
 
 cur = conn.cursor()
 t0 = time()
-#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
-cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
+#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
 #make a dictionary of keys:values - matter_id:(title, text)
 documentDict = {}
@@ -196,7 +196,8 @@ remaining_keys3 = list(remaining_docs3.keys())
 print("There are " + str(len(remaining_keys3)) + " documents remaining.")
 print("Title analysis done in %fs" % (time() - t0))
 
-compileDictionaries(documentDict, documentDict2, documentDict3)
+result = compileDictionaries(documentDict, documentDict2, documentDict3)
+dictPrint(result[1])
 
 # labels = None # not sure what the analog to labels is for our dataset
 # true_k = 35 # is there a smarter way to get this from our documents?
