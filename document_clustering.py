@@ -135,7 +135,7 @@ titles = []
 #Connect to the database
 try:
     conn = psycopg2.connect(database='cityhallmonitor',user='cityhallmonitor',password='cityhallmonitor',host='localhost')
-           #psycopg2.connect("dbname='cityhallmonitor' user='Bomani' host='localhost' password='wolfbite1'")
+          
     print("Database Connected!")
 except:
     print("I am unable to connect to the database")
