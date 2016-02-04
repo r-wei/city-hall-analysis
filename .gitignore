@@ -7,5 +7,7 @@ cloudTexts.py
 getDates.py
 joes_example.py
 quick_count.py
+topWords.txt
+cluster_results
 *~
 *.pyc
