@@ -1,55 +1,55 @@
-"""
-http://scikit-learn.org/stable/auto_examples/text/document_clustering.html
-adapted to work with documents from City Hall Monitor
-=======================================
-Clustering text documents using k-means
-=======================================
-.
-This is an example showing how the scikit-learn can be used to cluster
-documents by topics using a bag-of-words approach. This example uses
-a scipy.sparse matrix to store the features instead of standard numpy arrays.
+# """
+# http://scikit-learn.org/stable/auto_examples/text/document_clustering.html
+# adapted to work with documents from City Hall Monitor
+# =======================================
+# Clustering text documents using k-means
+# =======================================
+# .
+# This is an example showing how the scikit-learn can be used to cluster
+# documents by topics using a bag-of-words approach. This example uses
+# a scipy.sparse matrix to store the features instead of standard numpy arrays.
 
-Two feature extraction methods can be used in this example:
+# Two feature extraction methods can be used in this example:
 
-  - TfidfVectorizer uses a in-memory vocabulary (a python dict) to map the most
-    frequent words to features indices and hence compute a word occurrence
-    frequency (sparse) matrix. The word frequencies are then reweighted using
-    the Inverse Document Frequency (IDF) vector collected feature-wise over
-    the corpus.
+#   - TfidfVectorizer uses a in-memory vocabulary (a python dict) to map the most
+#     frequent words to features indices and hence compute a word occurrence
+#     frequency (sparse) matrix. The word frequencies are then reweighted using
+#     the Inverse Document Frequency (IDF) vector collected feature-wise over
+#     the corpus.
 
-  - HashingVectorizer hashes word occurrences to a fixed dimensional space,
-    possibly with collisions. The word count vectors are then normalized to
-    each have l2-norm equal to one (projected to the euclidean unit-ball) which
-    seems to be important for k-means to work in high dimensional space.
+#   - HashingVectorizer hashes word occurrences to a fixed dimensional space,
+#     possibly with collisions. The word count vectors are then normalized to
+#     each have l2-norm equal to one (projected to the euclidean unit-ball) which
+#     seems to be important for k-means to work in high dimensional space.
 
-    HashingVectorizer does not provide IDF weighting as this is a stateless
-    model (the fit method does nothing). When IDF weighting is needed it can
-    be added by pipelining its output to a TfidfTransformer instance.
+#     HashingVectorizer does not provide IDF weighting as this is a stateless
+#     model (the fit method does nothing). When IDF weighting is needed it can
+#     be added by pipelining its output to a TfidfTransformer instance.
 
-Two algorithms are demoed: ordinary k-means and its more scalable cousin
-minibatch k-means.
+# Two algorithms are demoed: ordinary k-means and its more scalable cousin
+# minibatch k-means.
 
-Additionally, latent sematic analysis can also be used to reduce dimensionality
-and discover latent patterns in the data.
+# Additionally, latent sematic analysis can also be used to reduce dimensionality
+# and discover latent patterns in the data.
 
-It can be noted that k-means (and minibatch k-means) are very sensitive to
-feature scaling and that in this case the IDF weighting helps improve the
-quality of the clustering by quite a lot as measured against the "ground truth"
-provided by the class label assignments of the 20 newsgroups dataset.
+# It can be noted that k-means (and minibatch k-means) are very sensitive to
+# feature scaling and that in this case the IDF weighting helps improve the
+# quality of the clustering by quite a lot as measured against the "ground truth"
+# provided by the class label assignments of the 20 newsgroups dataset.
 
-This improvement is not visible in the Silhouette Coefficient which is small
-for both as this measure seem to suffer from the phenomenon called
-"Concentration of Measure" or "Curse of Dimensionality" for high dimensional
-datasets such as text data. Other measures such as V-measure and Adjusted Rand
-Index are information theoretic based evaluation scores: as they are only based
-on cluster assignments rather than distances, hence not affected by the curse
-of dimensionality.
+# This improvement is not visible in the Silhouette Coefficient which is small
+# for both as this measure seem to suffer from the phenomenon called
+# "Concentration of Measure" or "Curse of Dimensionality" for high dimensional
+# datasets such as text data. Other measures such as V-measure and Adjusted Rand
+# Index are information theoretic based evaluation scores: as they are only based
+# on cluster assignments rather than distances, hence not affected by the curse
+# of dimensionality.
 
-Note: as k-means is optimizing a non-convex objective function, it will likely
-end up in a local optimum. Several runs with independent random init might be
-necessary to get a good convergence.
+# Note: as k-means is optimizing a non-convex objective function, it will likely
+# end up in a local optimum. Several runs with independent random init might be
+# necessary to get a good convergence.
 
-"""
+# """
 
 # Author: Peter Prettenhofer <peter.prettenhofer@gmail.com>
 #         Lars Buitinck <L.J.Buitinck@uva.nl>
@@ -83,38 +83,38 @@ import collections
 import os
 
 
-# Display progress logs on stdout
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s')
+# # Display progress logs on stdout
+# logging.basicConfig(level=logging.INFO,
+#                     format='%(asctime)s %(levelname)s %(message)s')
 
-# parse commandline arguments
-op = OptionParser()
-op.add_option("--lsa",
-              dest="n_components", type="int",
-              help="Preprocess documents with latent semantic analysis.")
-op.add_option("--no-minibatch",
-              action="store_false", dest="minibatch", default=True,
-              help="Use ordinary k-means algorithm (in batch mode).")
-op.add_option("--no-idf",
-              action="store_false", dest="use_idf", default=True,
-              help="Disable Inverse Document Frequency feature weighting.")
-op.add_option("--use-hashing",
-              action="store_true", default=False,
-              help="Use a hashing feature vectorizer")
-op.add_option("--n-features", type=int, default=10000,
-              help="Maximum number of features (dimensions)"
-                   " to extract from text.")
-op.add_option("--verbose",
-              action="store_true", dest="verbose", default=False,
-              help="Print progress reports inside k-means algorithm.")
+# # parse commandline arguments
+# op = OptionParser()
+# op.add_option("--lsa",
+#               dest="n_components", type="int",
+#               help="Preprocess documents with latent semantic analysis.")
+# op.add_option("--no-minibatch",
+#               action="store_false", dest="minibatch", default=True,
+#               help="Use ordinary k-means algorithm (in batch mode).")
+# op.add_option("--no-idf",
+#               action="store_false", dest="use_idf", default=True,
+#               help="Disable Inverse Document Frequency feature weighting.")
+# op.add_option("--use-hashing",
+#               action="store_true", default=False,
+#               help="Use a hashing feature vectorizer")
+# op.add_option("--n-features", type=int, default=10000,
+#               help="Maximum number of features (dimensions)"
+#                    " to extract from text.")
+# op.add_option("--verbose",
+#               action="store_true", dest="verbose", default=False,
+#               help="Print progress reports inside k-means algorithm.")
 
-print(__doc__)
-op.print_help()
+# print(__doc__)
+# op.print_help()
 
-(opts, args) = op.parse_args()
-if len(args) > 0:
-    op.error("this script takes no arguments.")
-    sys.exit(1)
+# (opts, args) = op.parse_args()
+# if len(args) > 0:
+#     op.error("this script takes no arguments.")
+#     sys.exit(1)
 
 ###############################################################################
 
@@ -198,7 +198,7 @@ print("Title analysis done in %fs" % (time() - t0))
 
 result = compileDictionaries(documentDict, documentDict2, documentDict3)
 
-dictPrint(result)
+dictPrint(getIndex(result))
 
 # labels = None # not sure what the analog to labels is for our dataset
 # true_k = 35 # is there a smarter way to get this from our documents?
@@ -346,4 +346,3 @@ dictPrint(result)
 #   print('No. of docs: ' + str(len(list(clusterDict.keys()))))
 #   analyzedCluster = group_titles(clusterDict)
 #   print('\n')
-
