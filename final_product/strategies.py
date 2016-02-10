@@ -23,7 +23,7 @@ def isClaim(title):
 def isPubUse(title):
     #classify a title as "Public Use" if it contains a term from pub_terms
 
-    pub_terms = ["public way", "canopy(s)", "awning(s)", "sidewalk cafe(s)", "issuance of permits"]
+    pub_terms = ["grant(s) of privilege in public way", "grants of privilege in the public way", "canopy(s)", "awning(s)", "sidewalk cafe(s)", "issuance of permits"]
     if any(term in title for term in pub_terms):
         return "Public_Use"
     else:

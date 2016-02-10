@@ -8,6 +8,6 @@ def classifyTitle(title):
     title = title.lower()
     
     #apply classifying strategies to title
-    strategies = [isPark, isClaim, isPubUse, isProc, isExemp, isPermit, isDev, isOther, isTraf, isRecog, isTax]
+    strategies = [isTraf, isPark, isClaim, isExemp, isPubUse, isProc, isPermit, isDev, isOther, isRecog, isTax]
     result = apply_strategies(title, strategies)
     return result
