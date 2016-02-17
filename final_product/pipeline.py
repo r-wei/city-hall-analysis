@@ -39,7 +39,7 @@ except:
 cur = conn.cursor()
 t0 = time()
 cur.execute('select matter_attachment_id, title from cityhallmonitor_document')
-#cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
+# cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
 ############ Format data: make a dictionary of keys:values = matter_id:(title, text)
 documentDict = {}
@@ -66,7 +66,13 @@ for key in keys:
     if result == None:
         count +=1
     else:
-        output_file = open('results/'+result, 'a')
+        directory = 'results'
+        if not os.path.exists(directory):
+          os.makedirs(directory)
+
+        filename = directory + '/{}'.format(result)
+        output_file = open(filename, 'a')
         output_file.write("%s\n" % documentDict[key][0])
+        output_file.close()
 
 print("No. files remaining: " + str(count) + " - " + str(count/len(list(keys))) + "%")
