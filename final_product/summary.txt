@@ -1,6 +1,6 @@
 Description of the groups:
 
-1) Public_Use: These are mostly the City of Chicago granting various organizations the right to use public land/property. For example, allowing Corner Bakery to set up sidewalk cafes or have awnings or canopies. Includes "grants of privilege in public way" and "issuance of permits for warrants" to use public areas.
+1) Public_Use: These are mostly the City of Chicago granting various organizations the right to use public land/property. For example, allowing Corner Bakery to set up sidewalk cafes or have awnings or canopies. Includes "grants of privilege in public way" and "issuance of permits for warrants" to use public areas. Also "vacation of public alleys".
 
 2) Parking: Various types of parking permits (handicapped, residential, industrial). Also includes amendments to the municipal code on laws related to parking.
 
