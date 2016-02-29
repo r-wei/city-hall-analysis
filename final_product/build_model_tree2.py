@@ -60,17 +60,21 @@ documentDict = classify(documentDict)#documentDict contains key=matter_id, value
 t0 = time()
 labeled_ids = []
 labeled_titles = []
+labeled_text = []
 labels = []
 
 unlabeled_ids = []
 unlabeled_titles = []
+unlabeled_text = []
 for key in documentDict.keys():
     if documentDict[key][2] == None:
         unlabeled_ids = unlabeled_ids + [key]
         unlabeled_titles = unlabeled_titles + [documentDict[key][0]]
+        unlabeled_text = unlabeled_text + [documentDict[key][1]]
     else:
         labeled_ids = labeled_ids + [key]
         labeled_titles = labeled_titles + [documentDict[key][0]]
+        labeled_text = labeled_text + [documentDict[key][1]]
         labels = labels + [documentDict[key][2]]
 print("Copying from documentDict done in %fs" % (time() - t0))
 
@@ -81,26 +85,25 @@ t0 = time()
 
 
 #my_stop_words = text.ENGLISH_STOP_WORDS.union({"designation", "amendment", "municipal", "code"})
-vectorizer = TfidfVectorizer(analyzer='word', max_df=0.4, #max_features=5,
-                                 min_df=0.002, stop_words='english',
-                                 ngram_range=(1, 3)
+vectorizer = TfidfVectorizer(analyzer='word', max_df=0.5, #max_features=5,
+                                 min_df=0.25, stop_words='english',
+                                 ngram_range=(2, 3)
 				)
 
 #Option 2: Perform an IDF normalization on the output of HashingVectorizer
 #hasher = HashingVectorizer(#n_features=opts.n_features,
 #                                   stop_words='english', non_negative=True,
-#                                   norm=None, binary=False)
-#vectorizer = make_pipeline(hasher, TfidfTransformer())
+#                                   norm=None, binary=False, ngram_range=(1, 3))
+#vectorizer = pipeline.make_pipeline(hasher, TfidfTransformer())
 
 
 #### c. apply vectorizer to labeled and unlabeled titles
-X_all = vectorizer.fit_transform(labeled_titles+unlabeled_titles)
-X_matrix_all = X_all.todense()
+X_all = vectorizer.fit_transform(labeled_text+unlabeled_text)
 k = len(labels)
-X_matrix = X_matrix_all[:k,:]
-X_matrix_unlab = X_matrix_all[k:,:]
+X_matrix = X_all[:k,:]
+X_matrix_unlab = X_all[k:,:]
 
-print("vectorizer dimensions (all data): " + str(X_matrix_all.shape))
+print("vectorizer dimensions (all data): " + str(X_all.shape))
 print("vectorizer done in %fs" % (time() - t0))
 
 ####### d. dummy code labels
@@ -131,7 +134,7 @@ print("dummy coding done in %fs" % (time() - t0))
 ############ feature select, classify, test-set validate, report
 
 selector = feature_selection.SelectKBest(k=100)
-classifier = naive_bayes.MultinomialNB(class_prior = np.reshape(np.repeat(np.array([[1.0/14.0]]),14,axis=1), (14,))) #flat priors
+classifier = naive_bayes.MultinomialNB(class_prior = np.reshape(np.repeat(np.array([[1.0/12.0]]),12,axis=1), (12,))) #flat priors
 
 steps = [('feature_selection', selector), ('multinomial_nb', classifier)]
 

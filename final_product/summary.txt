@@ -22,6 +22,12 @@ Description of the groups:
 
 11) Tax: Includes documents related to tax increment funding (tifs) and tax incentives.
 
+12) Licenses: Amendments to the municipal code about liquor licenses and package goods licenses
+
+13) Interesting_Proceedings: Letters of support for reparations to victims of torture by chicago police department, special city council meetings, calls for hearings and support for various non-standard things.
+
+14) Interesting_Expenses: Settlement agreements, expenditure of open space impact fee funds for development projects, expenditure of various taxes.
+
 Questions we've had:
 - Should we merge the Parking group with the Traffic group?
 - Should "amendments to the municipal code" be included in the Parking and Exemptions groups?
@@ -29,4 +35,4 @@ Questions we've had:
 - What is the Other group about?
 - The Tax group probably has some newsworthy things.
 - Claims group: Are payments to firefighters and policemen realy like refunds and condo claims?
-- What is left in the 8% not included in this group? 
+- What is left in the 8% not included in this group? --could continue sorting "amendment of municipal code" docs thematically

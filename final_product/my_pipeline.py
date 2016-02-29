@@ -41,10 +41,10 @@ def getDocs():
     cur.execute('select matter_attachment_id, title, text from cityhallmonitor_document')
     # cur.execute('select matter_attachment_id, title, text from cityhallmonitor_matter m , cityhallmonitor_matterattachment ma , cityhallmonitor_document d where m.id=ma.matter_id and ma.id=d.matter_attachment_id')
 
-    ############ Format data: make a dictionary of keys:values = matter_id:(title, text)
+    ############ Format data: make a dictionary of keys:values = matter_id:[title, text]
     documentDict = {}
     for row in cur:
-      documentDict[row[0]] = (row[1], row[2])
+      documentDict[row[0]] = [row[1], row[2]]
 
     print("%d documents" % len(documentDict.keys()))
     print()
@@ -62,8 +62,10 @@ def classify(documentDict):
 
     for key in keys:
         title = documentDict[key][0]
+        title = cleanTitle(title)
         result = classifyTitle(title)
-        documentDict[key] = documentDict[key] + (result,)
+        documentDict[key][0] = title #replace with clean title
+        documentDict[key] = documentDict[key] + [result]
 
     #documentDict now contains key=matter_id, value=(title, text, classification/None)
     print("classify() done in %fs" % (time() - t0))
