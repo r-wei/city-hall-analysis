@@ -72,7 +72,7 @@ def classifyTitle(title):
                                                       'development agreement', 'city-owned building']), 
 		  TitleTermClassifier("Other", ["scope of services, budget and management agreement"]), 
 		  TitleTermClassifier("Recognition", ["honorary street", "tribute", "extended to", "congratulations",
-                                                      "commemoration", "anniversay", "historical landmark designation",
+                                                      "commemoration", "anniversary", "historical landmark designation",
                                                       "declaration of"]), 
 		  TitleTermClassifier("Tax", ["tif", "tax incentive", "tax increment financing", 
                                               "tax increment allocation", "property tax levy", "tifworks",

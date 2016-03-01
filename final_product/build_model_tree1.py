@@ -64,7 +64,7 @@ labels = []
 
 unlabeled_ids = []
 unlabeled_titles = []
-for key in documentDict.keys():
+for key in documentDict:
     if documentDict[key][2] == None:
         unlabeled_ids = unlabeled_ids + [key]
         unlabeled_titles = unlabeled_titles + [documentDict[key][0]]
